@@ -7,6 +7,7 @@ const role = require('../middleware/role.middleware');
 router.use(auth);
 
 router.put('/bot-token', controller.updateTelegramToken);
+router.get('/me', controller.me);
 
 router.get('/', role('manager'), controller.list);
 router.get('/:id', role('manager'), controller.get);

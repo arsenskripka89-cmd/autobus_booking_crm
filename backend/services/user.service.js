@@ -3,7 +3,7 @@ const db = require('../config/db');
 
 function getAll() {
   return new Promise((resolve, reject) => {
-    db.all('SELECT id, name, phone, role, created_at FROM users', [], (err, rows) => {
+    db.all('SELECT id, name, phone, email, role, telegram_token, created_at FROM users', [], (err, rows) => {
       if (err) return reject(err);
       resolve(rows);
     });
@@ -12,7 +12,7 @@ function getAll() {
 
 function getById(id) {
   return new Promise((resolve, reject) => {
-    db.get('SELECT id, name, phone, role, created_at FROM users WHERE id = ?', [id], (err, row) => {
+    db.get('SELECT id, name, phone, email, role, telegram_token, created_at FROM users WHERE id = ?', [id], (err, row) => {
       if (err) return reject(err);
       resolve(row);
     });
@@ -31,9 +31,10 @@ function getTelegramToken(id) {
 function create(data) {
   const password_hash = bcrypt.hashSync(data.password, 10);
   return new Promise((resolve, reject) => {
-    db.run('INSERT INTO users (name, phone, password_hash, role) VALUES (?,?,?,?)', [
+    db.run('INSERT INTO users (name, phone, email, password_hash, role) VALUES (?,?,?,?,?)', [
       data.name,
       data.phone,
+      data.email,
       password_hash,
       data.role || 'manager'
     ], function (err) {
@@ -44,7 +45,7 @@ function create(data) {
 }
 
 function update(id, data) {
-  const fields = ['name', 'phone', 'role'];
+  const fields = ['name', 'phone', 'email', 'role'];
   const updates = [];
   const params = [];
   fields.forEach((f) => {

@@ -13,6 +13,7 @@ const bookingRoutes = require('./routes/bookings.routes');
 const broadcastRoutes = require('./routes/broadcast.routes');
 const { createTelegramBot } = require('./bots/telegram.bot');
 const userService = require('./services/user.service');
+const auth = require('./middleware/auth');
 
 const app = express();
 app.use(cors());
@@ -44,6 +45,22 @@ app.post('/webhook/:userId', async (req, res) => {
   } catch (err) {
     console.error('Telegram webhook error', err);
     res.sendStatus(500);
+  }
+});
+
+app.get('/debug/bot-status', auth, async (req, res, next) => {
+  try {
+    const user = await userService.getById(req.userId);
+    const serverUrl = (process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+    const webhookUrl = `${serverUrl}/webhook/${req.userId}`;
+    res.json({
+      userId: req.userId,
+      telegram_token: user?.telegram_token || null,
+      webhookUrl,
+      botIsReady: Boolean(user?.telegram_token)
+    });
+  } catch (err) {
+    next(err);
   }
 });
 

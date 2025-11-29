@@ -46,6 +46,15 @@ async function get(req, res, next) {
   }
 }
 
+async function me(req, res, next) {
+  try {
+    const user = await userService.getById(req.userId);
+    res.json(user);
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function updateTelegramToken(req, res, next) {
   try {
     const { token } = req.body;
@@ -60,4 +69,4 @@ async function updateTelegramToken(req, res, next) {
   }
 }
 
-module.exports = { list, create, update, remove, get, updateTelegramToken };
+module.exports = { list, create, update, remove, get, me, updateTelegramToken };
