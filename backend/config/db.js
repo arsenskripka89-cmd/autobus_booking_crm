@@ -7,10 +7,12 @@ const db = new sqlite3.Database(dbPath);
 db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    phone TEXT UNIQUE NOT NULL,
+    name TEXT,
+    phone TEXT UNIQUE,
+    email TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
     role TEXT NOT NULL DEFAULT 'manager',
+    telegram_token TEXT DEFAULT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );`);
 
@@ -19,14 +21,6 @@ db.serialize(() => {
     user_id INTEGER NOT NULL,
     from_city TEXT NOT NULL,
     to_city TEXT NOT NULL
-  );`);
-
-  db.run(`CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email TEXT UNIQUE NOT NULL,
-    password_hash TEXT NOT NULL,
-    telegram_token TEXT DEFAULT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );`);
 
   db.run(`CREATE TABLE IF NOT EXISTS buses (
@@ -69,15 +63,28 @@ db.serialize(() => {
     payload TEXT
   );`);
 
+  // Attempt to backfill columns for existing databases
+  db.run('ALTER TABLE users ADD COLUMN email TEXT UNIQUE', (err) => {
+    if (err && !String(err.message).includes('duplicate column')) {
+      console.error('Failed to add email column', err.message);
+    }
+  });
+  db.run('ALTER TABLE users ADD COLUMN telegram_token TEXT', (err) => {
+    if (err && !String(err.message).includes('duplicate column')) {
+      console.error('Failed to add telegram_token column', err.message);
+    }
+  });
+
   // Seed admin user if none exists
   db.get('SELECT COUNT(*) as count FROM users', (err, row) => {
     if (err) return console.error('DB seed error', err);
     if (row.count === 0) {
       const bcrypt = require('bcryptjs');
       const password_hash = bcrypt.hashSync('admin123', 10);
-      db.run('INSERT INTO users (name, phone, password_hash, role) VALUES (?,?,?,?)', [
+      db.run('INSERT INTO users (name, phone, email, password_hash, role) VALUES (?,?,?,?,?)', [
         'Admin',
         '+10000000000',
+        'admin@example.com',
         password_hash,
         'admin'
       ]);

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const controller = require('../controllers/broadcast.controller');
-const auth = require('../middleware/auth.middleware');
+const auth = require('../middleware/auth');
 const role = require('../middleware/role.middleware');
 
 router.use(auth);
