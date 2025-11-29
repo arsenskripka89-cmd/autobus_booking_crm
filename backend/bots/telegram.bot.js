@@ -6,6 +6,7 @@ const token = process.env.TELEGRAM_BOT_TOKEN;
 let bot;
 const knownChats = new Map(); // phone -> chatId
 const sessionStore = new Map();
+const DEFAULT_USER_ID = Number(process.env.DEFAULT_USER_ID) || 1;
 
 if (token) {
   bot = new Telegraf(token);
@@ -31,22 +32,24 @@ if (token) {
   });
 
   bot.hears('🚌 Розклад рейсів', async (ctx) => {
-    const trips = await tripService.getAll();
+    const trips = await tripService.getAll(DEFAULT_USER_ID);
     if (!trips.length) return ctx.reply('Немає запланованих рейсів.');
     const text = trips.map((t) => `${t.id}: ${t.from_city} → ${t.to_city} ${t.date} ${t.time} $${t.price}`).join('\n');
     ctx.reply(text);
   });
 
   bot.hears('🎟 Забронювати місце', async (ctx) => {
-    const trips = await tripService.getAll();
+    const trips = await tripService.getAll(DEFAULT_USER_ID);
     if (!trips.length) return ctx.reply('Немає доступних рейсів');
-    const buttons = trips.slice(0, 10).map((t) => [Markup.button.callback(`${t.from_city}→${t.to_city} ${t.date}`, `book_${t.id}`)]);
+    const buttons = trips
+      .slice(0, 10)
+      .map((t) => [Markup.button.callback(`${t.from_city}→${t.to_city} ${t.date}`, `book_${t.id}`)]);
     ctx.reply('Оберіть рейс для бронювання', Markup.inlineKeyboard(buttons));
   });
 
   bot.action(/book_(\d+)/, async (ctx) => {
     const tripId = ctx.match[1];
-    const seats = await bookingService.availableSeats(tripId);
+    const seats = await bookingService.availableSeats(tripId, DEFAULT_USER_ID);
     const buttons = seats.slice(0, 30).map((s) => Markup.button.callback(`${s}`, `seat_${tripId}_${s}`));
     const chunks = [];
     while (buttons.length) chunks.push(buttons.splice(0, 5));
@@ -68,7 +71,7 @@ if (token) {
     if (ctx.session && ctx.session.booking && ctx.session.booking.passenger_name && !ctx.session.booking.passenger_phone) {
       ctx.session.booking.passenger_phone = ctx.message.text;
       try {
-        const booking = await bookingService.create(ctx.session.booking);
+        const booking = await bookingService.create(ctx.session.booking, DEFAULT_USER_ID);
         knownChats.set(ctx.session.booking.passenger_phone, ctx.chat.id);
         ctx.reply(`Бронювання створено №${booking.id}. Дякуємо!`);
       } catch (e) {
@@ -83,8 +86,8 @@ if (token) {
   bot.hears('📄 Мої бронювання', async (ctx) => {
     const phone = ctx.session?.booking?.passenger_phone;
     if (!phone) return ctx.reply('Надішліть свій телефон через процес бронювання, щоб побачити список.');
-    const trips = await tripService.getAll();
-    const bookings = await Promise.all(trips.map((t) => bookingService.listByTrip(t.id)));
+    const trips = await tripService.getAll(DEFAULT_USER_ID);
+    const bookings = await Promise.all(trips.map((t) => bookingService.listByTrip(t.id, DEFAULT_USER_ID)));
     const my = bookings.flat().filter((b) => b.passenger_phone === phone);
     if (!my.length) return ctx.reply('Немає бронювань.');
     const text = my.map((b) => `Бронювання ${b.id} місце ${b.seat_number}, статус: ${b.status}`).join('\n');

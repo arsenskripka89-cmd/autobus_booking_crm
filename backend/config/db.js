@@ -16,6 +16,7 @@ db.serialize(() => {
 
   db.run(`CREATE TABLE IF NOT EXISTS routes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
     from_city TEXT NOT NULL,
     to_city TEXT NOT NULL
   );`);
@@ -30,12 +31,14 @@ db.serialize(() => {
 
   db.run(`CREATE TABLE IF NOT EXISTS buses (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
     number TEXT NOT NULL,
     seats_count INTEGER NOT NULL DEFAULT 50
   );`);
 
   db.run(`CREATE TABLE IF NOT EXISTS trips (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
     route_id INTEGER NOT NULL,
     bus_id INTEGER NOT NULL,
     date TEXT NOT NULL,
@@ -48,6 +51,7 @@ db.serialize(() => {
 
   db.run(`CREATE TABLE IF NOT EXISTS bookings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
     trip_id INTEGER NOT NULL,
     passenger_name TEXT NOT NULL,
     passenger_phone TEXT NOT NULL,

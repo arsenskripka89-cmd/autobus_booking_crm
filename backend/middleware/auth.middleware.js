@@ -9,6 +9,7 @@ module.exports = function authMiddleware(req, res, next) {
   try {
     const decoded = jwt.verify(token, SECRET);
     req.user = decoded;
+    req.userId = decoded.id;
     return next();
   } catch (e) {
     return res.status(401).json({ message: 'Invalid token' });

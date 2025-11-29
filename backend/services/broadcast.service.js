@@ -1,10 +1,10 @@
 const db = require('../config/db');
 const telegramBot = require('../bots/telegram.bot');
 
-function recipients(filter) {
+function recipients(filter, userId) {
   return new Promise((resolve, reject) => {
-    let query = 'SELECT DISTINCT passenger_phone FROM bookings WHERE status != "cancelled"';
-    const params = [];
+    let query = 'SELECT DISTINCT passenger_phone FROM bookings WHERE status != "cancelled" AND user_id = ?';
+    const params = [userId];
     if (filter.trip_id) {
       query += ' AND trip_id = ?';
       params.push(filter.trip_id);
@@ -24,13 +24,13 @@ function recipients(filter) {
   });
 }
 
-async function sendTelegram(message, filter = {}) {
-  const phones = await recipients(filter);
+async function sendTelegram(message, filter = {}, userId) {
+  const phones = await recipients(filter, userId);
   return telegramBot.sendBroadcast(phones, message);
 }
 
-async function sendViber(message, filter = {}) {
-  const phones = await recipients(filter);
+async function sendViber(message, filter = {}, userId) {
+  const phones = await recipients(filter, userId);
   return { sent: false, phones, error: 'Viber bot support has been removed.' };
 }
 
