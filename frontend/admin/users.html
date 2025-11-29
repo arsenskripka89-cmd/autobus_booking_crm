@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Користувачі</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="users">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="dashboard.html">Bus CRM</a>
+  </div>
+</nav>
+<div class="container">
+  <h3>Користувачі</h3>
+  <table class="table table-bordered">
+    <thead><tr><th>ID</th><th>Імʼя</th><th>Телефон</th><th>Роль</th></tr></thead>
+    <tbody id="users-body"></tbody>
+  </table>
+  <h5>Додати користувача</h5>
+  <form id="user-form" onsubmit="event.preventDefault(); submitForm('user-form','users');">
+    <div class="row g-2">
+      <div class="col"><input name="name" class="form-control" placeholder="Імʼя"></div>
+      <div class="col"><input name="phone" class="form-control" placeholder="Телефон"></div>
+      <div class="col"><input name="password" type="password" class="form-control" placeholder="Пароль"></div>
+      <div class="col"><select name="role" class="form-select"><option value="manager">manager</option><option value="admin">admin</option><option value="driver">driver</option></select></div>
+      <div class="col"><button class="btn btn-primary" type="submit">Зберегти</button></div>
+    </div>
+  </form>
+</div>
+<script src="scripts.js"></script>
+</body>
+</html>
