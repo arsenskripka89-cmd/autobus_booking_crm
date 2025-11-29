@@ -1,7 +1,7 @@
 {
   "name": "autobus_booking_crm",
   "version": "1.0.0",
-  "description": "Bus booking CRM with Express, SQLite, Telegram and Viber bots",
+  "description": "Bus booking CRM with Express, SQLite, and a Telegram bot",
   "main": "backend/index.js",
   "scripts": {
     "start": "node backend/index.js",
