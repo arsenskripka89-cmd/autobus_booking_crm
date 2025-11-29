@@ -20,6 +20,14 @@ db.serialize(() => {
     to_city TEXT NOT NULL
   );`);
 
+  db.run(`CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    telegram_token TEXT DEFAULT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );`);
+
   db.run(`CREATE TABLE IF NOT EXISTS buses (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     number TEXT NOT NULL,
