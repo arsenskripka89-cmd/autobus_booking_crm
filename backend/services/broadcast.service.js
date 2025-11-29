@@ -1,6 +1,5 @@
 const db = require('../config/db');
 const telegramBot = require('../bots/telegram.bot');
-const viberBot = require('../bots/viber.bot');
 
 function recipients(filter) {
   return new Promise((resolve, reject) => {
@@ -32,7 +31,7 @@ async function sendTelegram(message, filter = {}) {
 
 async function sendViber(message, filter = {}) {
   const phones = await recipients(filter);
-  return viberBot.sendBroadcast(phones, message);
+  return { sent: false, phones, error: 'Viber bot support has been removed.' };
 }
 
 module.exports = { sendTelegram, sendViber, recipients };

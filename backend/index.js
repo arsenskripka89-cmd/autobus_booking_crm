@@ -12,7 +12,6 @@ const tripRoutes = require('./routes/trips.routes');
 const bookingRoutes = require('./routes/bookings.routes');
 const broadcastRoutes = require('./routes/broadcast.routes');
 const telegramBot = require('./bots/telegram.bot');
-const viberBot = require('./bots/viber.bot');
 
 const app = express();
 app.use(cors());
@@ -41,4 +40,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server started on ${PORT}`));
 
 telegramBot.launch(app);
-viberBot.launch(app);

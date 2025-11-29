@@ -1,7 +1,7 @@
 {
   "name": "autobus_booking_crm",
   "version": "1.0.0",
-  "description": "Bus booking CRM with Express, SQLite, Telegram and Viber bots",
+  "description": "Bus booking CRM with Express, SQLite, and a Telegram bot",
   "main": "backend/index.js",
   "scripts": {
     "start": "node backend/index.js",
@@ -15,8 +15,7 @@
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "sqlite3": "^5.1.6",
-    "telegraf": "^4.16.3",
-    "viber-bot": "^2.3.2"
+    "telegraf": "^4.16.3"
   },
   "devDependencies": {
     "nodemon": "^3.1.4"
