@@ -26,7 +26,7 @@ function recipients(filter, userId) {
 
 async function sendTelegram(message, filter = {}, userId) {
   const phones = await recipients(filter, userId);
-  return telegramBot.sendBroadcast(phones, message);
+  return telegramBot.sendBroadcast(phones, message, userId);
 }
 
 async function sendViber(message, filter = {}, userId) {

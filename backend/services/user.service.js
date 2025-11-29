@@ -19,6 +19,15 @@ function getById(id) {
   });
 }
 
+function getTelegramToken(id) {
+  return new Promise((resolve, reject) => {
+    db.get('SELECT id, telegram_token FROM users WHERE id = ?', [id], (err, row) => {
+      if (err) return reject(err);
+      resolve(row);
+    });
+  });
+}
+
 function create(data) {
   const password_hash = bcrypt.hashSync(data.password, 10);
   return new Promise((resolve, reject) => {
@@ -57,6 +66,15 @@ function update(id, data) {
   });
 }
 
+function updateTelegramToken(userId, token) {
+  return new Promise((resolve, reject) => {
+    db.run('UPDATE users SET telegram_token = ? WHERE id = ?', [token, userId], function (err) {
+      if (err) return reject(err);
+      resolve({ changes: this.changes });
+    });
+  });
+}
+
 function remove(id) {
   return new Promise((resolve, reject) => {
     db.run('DELETE FROM users WHERE id = ?', [id], function (err) {
@@ -66,4 +84,4 @@ function remove(id) {
   });
 }
 
-module.exports = { getAll, getById, create, update, remove };
+module.exports = { getAll, getById, getTelegramToken, create, update, updateTelegramToken, remove };

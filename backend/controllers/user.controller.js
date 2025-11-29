@@ -1,3 +1,4 @@
+const axios = require('axios');
 const userService = require('../services/user.service');
 
 async function list(req, res, next) {
@@ -45,4 +46,18 @@ async function get(req, res, next) {
   }
 }
 
-module.exports = { list, create, update, remove, get };
+async function updateTelegramToken(req, res, next) {
+  try {
+    const { token } = req.body;
+    if (!token) return res.status(400).json({ message: 'Token is required' });
+    await userService.updateTelegramToken(req.userId, token);
+    const serverUrl = (process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+    const webhookUrl = `${serverUrl}/webhook/${req.userId}`;
+    await axios.get(`https://api.telegram.org/bot${token}/setWebhook`, { params: { url: webhookUrl } });
+    res.json({ success: true, webhookUrl, message: 'Бота активовано успішно' });
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { list, create, update, remove, get, updateTelegramToken };
