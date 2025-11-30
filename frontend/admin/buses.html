@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Автобуси</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="buses">
+  <div class="admin-layout">
+    <aside id="sidebar" class="sidebar"></aside>
+    <main class="content-area">
+      <div class="container-fluid">
+        <div class="page-header"><h3 class="mb-0">Автобуси</h3></div>
+        <div class="row g-4">
+          <div class="col-lg-5">
+            <div class="form-section">
+              <h5 class="mb-3">Додати автобус</h5>
+              <form id="bus-form" class="row g-3">
+                <div class="col-12">
+                  <label class="form-label">Номер автобуса <span class="required">*</span></label>
+                  <input name="bus_number" class="form-control" required placeholder="AA1234BB">
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Ім'я водія <span class="required">*</span></label>
+                  <input name="driver_name" class="form-control" required placeholder="ПІБ водія">
+                </div>
+                <div class="col-6">
+                  <label class="form-label">К-сть місць <span class="required">*</span></label>
+                  <input name="seats" type="number" class="form-control" required min="1" placeholder="50">
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Нотатка</label>
+                  <textarea name="note" class="form-control" rows="2" placeholder="Додаткова інформація"></textarea>
+                </div>
+                <div class="col-12">
+                  <button class="btn btn-primary" type="submit">Додати</button>
+                </div>
+              </form>
+            </div>
+          </div>
+          <div class="col-lg-7">
+            <div class="table-responsive">
+              <table class="table table-bordered align-middle">
+                <thead class="table-light"><tr><th>ID</th><th>Номер</th><th>Водій</th><th>Місць</th><th>Нотатка</th><th class="text-center" style="width:120px;">Дії</th></tr></thead>
+                <tbody id="buses-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal fade" id="busEditModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Редагувати автобус</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="bus-edit-form">
+          <div class="modal-body row g-3">
+            <input type="hidden" name="id" id="edit-bus-id">
+            <div class="col-12">
+              <label class="form-label">Номер автобуса <span class="required">*</span></label>
+              <input name="bus_number" id="edit-bus-number" class="form-control" required>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Ім'я водія <span class="required">*</span></label>
+              <input name="driver_name" id="edit-driver-name" class="form-control" required>
+            </div>
+            <div class="col-6">
+              <label class="form-label">К-сть місць <span class="required">*</span></label>
+              <input name="seats" id="edit-seats" type="number" class="form-control" required min="1">
+            </div>
+            <div class="col-12">
+              <label class="form-label">Нотатка</label>
+              <textarea name="note" id="edit-note" class="form-control" rows="2"></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+            <button type="submit" class="btn btn-primary">Зберегти</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="scripts.js"></script>
+</body>
+</html>
