@@ -19,11 +19,17 @@ const auth = require('./middleware/auth');
 const DEFAULT_ADMIN_EMAIL = 'admin@example.com';
 const DEFAULT_ADMIN_PASSWORD = 'Arsen2024!';
 
-const adminPasswordHash = bcrypt.hashSync(DEFAULT_ADMIN_PASSWORD, 10);
-db.run('UPDATE users SET password_hash = ? WHERE email = ?', [adminPasswordHash, DEFAULT_ADMIN_EMAIL], (err) => {
-  if (err) {
-    console.error('Failed to update default admin password', err);
+bcrypt.hash(DEFAULT_ADMIN_PASSWORD, 10, (hashError, adminPasswordHash) => {
+  if (hashError) {
+    console.error('Failed to hash default admin password', hashError);
+    return;
   }
+
+  db.run('UPDATE users SET password_hash = ? WHERE email = ?', [adminPasswordHash, DEFAULT_ADMIN_EMAIL], (err) => {
+    if (err) {
+      console.error('Failed to update default admin password', err);
+    }
+  });
 });
 
 const app = express();
