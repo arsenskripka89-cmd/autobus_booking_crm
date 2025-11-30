@@ -2,7 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const path = require('path');
-require('./config/db');
+const bcrypt = require('bcryptjs');
+const db = require('./config/db');
 
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/users.routes');
@@ -14,6 +15,22 @@ const broadcastRoutes = require('./routes/broadcast.routes');
 const { createTelegramBot } = require('./bots/telegram.bot');
 const userService = require('./services/user.service');
 const auth = require('./middleware/auth');
+
+const DEFAULT_ADMIN_EMAIL = 'admin@example.com';
+const DEFAULT_ADMIN_PASSWORD = 'Arsen2024!';
+
+bcrypt.hash(DEFAULT_ADMIN_PASSWORD, 10, (hashError, adminPasswordHash) => {
+  if (hashError) {
+    console.error('Failed to hash default admin password', hashError);
+    return;
+  }
+
+  db.run('UPDATE users SET password_hash = ? WHERE email = ?', [adminPasswordHash, DEFAULT_ADMIN_EMAIL], (err) => {
+    if (err) {
+      console.error('Failed to update default admin password', err);
+    }
+  });
+});
 
 const app = express();
 app.use(cors());
