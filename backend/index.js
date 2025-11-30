@@ -25,11 +25,17 @@ bcrypt.hash(DEFAULT_ADMIN_PASSWORD, 10, (hashError, adminPasswordHash) => {
     return;
   }
 
-  db.run('UPDATE users SET password_hash = ? WHERE email = ?', [adminPasswordHash, DEFAULT_ADMIN_EMAIL], (err) => {
-    if (err) {
-      console.error('Failed to update default admin password', err);
+  db.run(
+    'INSERT OR REPLACE INTO users (id, email, password_hash, role) VALUES (1, ?, ?, ?)',
+    [DEFAULT_ADMIN_EMAIL, adminPasswordHash, 'manager'],
+    (err) => {
+      if (err) {
+        console.error('Failed to seed default admin user', err);
+      } else {
+        console.log('Seeded default admin user:', DEFAULT_ADMIN_EMAIL);
+      }
     }
-  });
+  );
 });
 
 const app = express();
