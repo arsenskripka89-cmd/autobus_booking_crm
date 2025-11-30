@@ -1,5 +1,6 @@
-const axios = require('axios');
 const userService = require('../services/user.service');
+
+const TELEGRAM_TOKEN_REGEX = /^\d+:[A-Za-z0-9_-]+$/;
 
 async function list(req, res, next) {
   try {
@@ -65,13 +66,19 @@ async function updateTelegramToken(req, res, next) {
   try {
     const { token } = req.body;
     if (!token) return res.status(400).json({ message: 'Token is required' });
+    if (!TELEGRAM_TOKEN_REGEX.test(token)) {
+      return res.status(400).json({ message: 'Невірний формат токена. Формат: 123456:ABCDEF' });
+    }
+
     await userService.updateTelegramToken(req.userId, token);
     const serverUrl = (process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
     const webhookUrl = `${serverUrl}/webhook/${req.userId}`;
-    await axios.get(`https://api.telegram.org/bot${token}/setWebhook`, { params: { url: webhookUrl } });
-    console.log(`[admin] Telegram бот прив'язаний адміністратором user=${req.userId}`);
-    res.json({ success: true, webhookUrl, message: 'Бота активовано успішно' });
+    console.log(`[admin] Telegram токен збережено користувачем user=${req.userId}`);
+    res.json({ success: true, webhookUrl, message: 'Токен збережено. Налаштуйте webhook за потреби.' });
   } catch (err) {
+    if (err.response?.status === 400) {
+      return res.status(400).json({ message: 'Telegram API відхилив запит. Перевірте токен або спробуйте пізніше.' });
+    }
     next(err);
   }
 }
