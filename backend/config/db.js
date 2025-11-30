@@ -20,14 +20,19 @@ db.serialize(() => {
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
     from_city TEXT NOT NULL,
-    to_city TEXT NOT NULL
+    to_city TEXT NOT NULL,
+    parent_route_id INTEGER,
+    tag TEXT,
+    FOREIGN KEY(parent_route_id) REFERENCES routes(id)
   );`);
 
   db.run(`CREATE TABLE IF NOT EXISTS buses (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
-    number TEXT NOT NULL,
-    seats_count INTEGER NOT NULL DEFAULT 50
+    bus_number TEXT NOT NULL,
+    driver_name TEXT NOT NULL,
+    seats INTEGER NOT NULL,
+    note TEXT
   );`);
 
   db.run(`CREATE TABLE IF NOT EXISTS trips (
@@ -72,6 +77,38 @@ db.serialize(() => {
   db.run('ALTER TABLE users ADD COLUMN telegram_token TEXT', (err) => {
     if (err && !String(err.message).includes('duplicate column')) {
       console.error('Failed to add telegram_token column', err.message);
+    }
+  });
+
+  db.run('ALTER TABLE routes ADD COLUMN parent_route_id INTEGER', (err) => {
+    if (err && !String(err.message).includes('duplicate column')) {
+      console.error('Failed to add parent_route_id column', err.message);
+    }
+  });
+  db.run('ALTER TABLE routes ADD COLUMN tag TEXT', (err) => {
+    if (err && !String(err.message).includes('duplicate column')) {
+      console.error('Failed to add tag column', err.message);
+    }
+  });
+
+  db.run('ALTER TABLE buses ADD COLUMN bus_number TEXT', (err) => {
+    if (err && !String(err.message).includes('duplicate column')) {
+      console.error('Failed to add bus_number column', err.message);
+    }
+  });
+  db.run('ALTER TABLE buses ADD COLUMN driver_name TEXT', (err) => {
+    if (err && !String(err.message).includes('duplicate column')) {
+      console.error('Failed to add driver_name column', err.message);
+    }
+  });
+  db.run('ALTER TABLE buses ADD COLUMN seats INTEGER', (err) => {
+    if (err && !String(err.message).includes('duplicate column')) {
+      console.error('Failed to add seats column', err.message);
+    }
+  });
+  db.run('ALTER TABLE buses ADD COLUMN note TEXT', (err) => {
+    if (err && !String(err.message).includes('duplicate column')) {
+      console.error('Failed to add note column', err.message);
     }
   });
 

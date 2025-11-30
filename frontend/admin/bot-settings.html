@@ -3,40 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Налаштування Telegram-бота | Bus CRM</title>
+  <title>Налаштування Telegram-бота</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body data-page="bot-settings">
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="dashboard.html">Bus CRM</a>
-    <div class="collapse navbar-collapse">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item"><a class="nav-link" href="routes.html">Маршрути</a></li>
-        <li class="nav-item"><a class="nav-link" href="trips.html">Рейси</a></li>
-        <li class="nav-item"><a class="nav-link" href="bookings.html">Бронювання</a></li>
-        <li class="nav-item"><a class="nav-link" href="users.html">Користувачі</a></li>
-        <li class="nav-item"><a class="nav-link" href="passengers.html">Пасажири</a></li>
-        <li class="nav-item"><a class="nav-link" href="broadcasts.html">Розсилки</a></li>
-        <li class="nav-item"><a class="nav-link active" href="bot-settings.html">Налаштування Telegram-бота</a></li>
-      </ul>
-    </div>
-  </div>
-</nav>
-<div class="container">
-  <h3 class="mb-4">Налаштування Telegram-бота</h3>
-  <div class="card">
-    <div class="card-body">
-      <div class="mb-3">
-        <label for="botToken" class="form-label">Bot Token</label>
-        <input type="text" id="botToken" class="form-control" placeholder="Наприклад: 123456:ABC" />
+  <div class="admin-layout">
+    <aside id="sidebar" class="sidebar"></aside>
+    <main class="content-area">
+      <div class="container-fluid">
+        <div class="page-header"><h3 class="mb-0">Налаштування Telegram-бота</h3></div>
+        <div class="form-section">
+          <div class="mb-3">
+            <label class="form-label">Bot Token <span class="required">*</span></label>
+            <input type="text" id="botToken" class="form-control" placeholder="Вставте токен" required>
+          </div>
+          <button class="btn btn-primary" id="saveBotToken">Зберегти</button>
+          <div id="botSettingsMessage" class="alert alert-success mt-3" style="display:none;">Бота активовано успішно.</div>
+        </div>
       </div>
-      <button id="saveBotToken" class="btn btn-primary">Зберегти</button>
-      <div id="botSettingsMessage" class="mt-3 text-success" style="display:none;">Бота активовано успішно.</div>
-    </div>
+    </main>
   </div>
-</div>
-<script src="js/bot-settings.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="scripts.js"></script>
+  <script src="js/bot-settings.js"></script>
 </body>
 </html>

@@ -2,7 +2,7 @@ const db = require('../config/db');
 
 function getAll(userId) {
   return new Promise((resolve, reject) => {
-    db.all(`SELECT trips.*, routes.from_city, routes.to_city, buses.number AS bus_number, buses.seats_count
+    db.all(`SELECT trips.*, routes.from_city, routes.to_city, buses.bus_number AS bus_number, buses.seats
             FROM trips
             JOIN routes ON routes.id = trips.route_id
             JOIN buses ON buses.id = trips.bus_id
@@ -15,7 +15,7 @@ function getAll(userId) {
 
 function getById(id, userId) {
   return new Promise((resolve, reject) => {
-    db.get(`SELECT trips.*, routes.from_city, routes.to_city, buses.number AS bus_number, buses.seats_count
+    db.get(`SELECT trips.*, routes.from_city, routes.to_city, buses.bus_number AS bus_number, buses.seats
             FROM trips
             JOIN routes ON routes.id = trips.route_id
             JOIN buses ON buses.id = trips.bus_id

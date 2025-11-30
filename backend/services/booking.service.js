@@ -11,10 +11,10 @@ function listByTrip(trip_id, userId) {
 
 function availableSeats(trip_id, userId) {
   return new Promise((resolve, reject) => {
-    db.get('SELECT buses.seats_count FROM trips JOIN buses ON buses.id = trips.bus_id WHERE trips.id = ? AND trips.user_id = ?', [trip_id, userId], (err, row) => {
+    db.get('SELECT buses.seats FROM trips JOIN buses ON buses.id = trips.bus_id WHERE trips.id = ? AND trips.user_id = ?', [trip_id, userId], (err, row) => {
       if (err) return reject(err);
       if (!row) return resolve([]);
-      const seatsCount = row.seats_count;
+      const seatsCount = row.seats;
       db.all('SELECT seat_number FROM bookings WHERE trip_id = ? AND user_id = ? AND status != "cancelled"', [trip_id, userId], (err2, booked) => {
         if (err2) return reject(err2);
         const taken = booked.map((b) => b.seat_number);

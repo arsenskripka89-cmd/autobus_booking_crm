@@ -1,49 +1,39 @@
-const API_URL = window.location.origin;
-
-function getToken() {
-  return localStorage.getItem('token');
-}
-
-function authHeaders() {
-  return { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` };
-}
-
-function ensureAuth() {
-  if (!getToken()) {
+function ensureBotAuth() {
+  if (typeof getToken === 'function' && !getToken()) {
     window.location.href = '/admin/login.html';
   }
 }
 
 async function loadCurrentToken() {
-  const res = await fetch(`${API_URL}/users/me`, { headers: authHeaders() });
-  if (res.status === 401) {
-    return window.location.replace('/admin/login.html');
-  }
-  const user = await res.json();
-  if (user?.telegram_token) {
-    document.getElementById('botToken').value = user.telegram_token;
+  try {
+    const user = await apiFetch('/users/me');
+    if (user?.telegram_token) {
+      document.getElementById('botToken').value = user.telegram_token;
+    }
+  } catch (err) {
+    console.error(err);
   }
 }
 
 async function saveToken() {
   const token = document.getElementById('botToken').value.trim();
   if (!token) return alert('Введіть токен');
-  const res = await fetch(`${API_URL}/users/bot-token`, {
-    method: 'PUT',
-    headers: authHeaders(),
-    body: JSON.stringify({ token })
-  });
-  if (res.status === 401) {
-    return window.location.replace('/admin/login.html');
+  try {
+    const res = await apiFetch('/users/bot-token', {
+      method: 'PUT',
+      body: JSON.stringify({ token })
+    });
+    document.getElementById('botSettingsMessage').style.display = 'block';
+    if (res?.webhookUrl) {
+      document.getElementById('botSettingsMessage').textContent = `Бота активовано успішно. Webhook: ${res.webhookUrl}`;
+    }
+  } catch (err) {
+    alert(err.message || 'Не вдалося зберегти токен');
   }
-  if (!res.ok) {
-    return alert('Не вдалося зберегти токен');
-  }
-  document.getElementById('botSettingsMessage').style.display = 'block';
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-  ensureAuth();
+  ensureBotAuth();
   loadCurrentToken();
   document.getElementById('saveBotToken').addEventListener('click', saveToken);
 });

@@ -5,24 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Розсилки</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body data-page="broadcasts">
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="dashboard.html">Bus CRM</a>
+  <div class="admin-layout">
+    <aside id="sidebar" class="sidebar"></aside>
+    <main class="content-area">
+      <div class="container-fluid">
+        <div class="page-header"><h3 class="mb-0">Розсилки</h3></div>
+        <div class="form-section">
+          <form id="broadcast-form">
+            <div class="mb-3">
+              <label class="form-label">Текст повідомлення <span class="required">*</span></label>
+              <textarea id="message" class="form-control" rows="5" required></textarea>
+            </div>
+            <button class="btn btn-primary" type="submit">Надіслати</button>
+          </form>
+        </div>
+      </div>
+    </main>
   </div>
-</nav>
-<div class="container">
-  <h3>Розсилки</h3>
-  <form id="broadcast-form">
-    <div class="mb-3">
-      <label class="form-label">Текст повідомлення</label>
-      <textarea id="message" class="form-control" rows="4"></textarea>
-    </div>
-    <button class="btn btn-primary" type="submit">Надіслати</button>
-  </form>
-</div>
-<script src="scripts.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="scripts.js"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
 module.exports = {
   table: 'buses',
-  columns: ['id', 'user_id', 'number', 'seats_count']
+  columns: ['id', 'user_id', 'bus_number', 'driver_name', 'seats', 'note']
 };
