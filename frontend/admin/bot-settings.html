@@ -14,13 +14,41 @@
     <main class="content-area">
       <div class="container-fluid">
         <div class="page-header"><h3 class="mb-0">Налаштування Telegram-бота</h3></div>
+        <div class="card shadow-sm mb-3">
+          <div class="card-body">
+            <button class="btn btn-link p-0 d-flex align-items-center gap-2" type="button" data-bs-toggle="collapse" data-bs-target="#tokenInstructions" aria-expanded="false">
+              <i class="bi bi-caret-down-square"></i>
+              <span class="fw-semibold">Як отримати Telegram токен?</span>
+            </button>
+            <div class="collapse mt-3" id="tokenInstructions">
+              <p class="text-muted">Інструкція, як отримати токен бота та підключити вебхук.</p>
+              <ol class="mb-4">
+                <li>Відкрийте @BotFather у Telegram та виконайте команду <code>/newbot</code>.</li>
+                <li>Вкажіть назву та унікальний username бота.</li>
+                <li>Скопіюйте виданий <strong>HTTP API token</strong>.</li>
+                <li>У файлі <code>.env</code> вашого серверу додайте змінну <code>TELEGRAM_BOT_TOKEN=&lt;token&gt;</code>.</li>
+                <li>Перезапустіть сервер, щоб токен підтягнувся.</li>
+                <li>Налаштуйте webhook: <code>https://api.telegram.org/bot&lt;token&gt;/setWebhook?url=https://your-domain.com/webhook/&lt;userId&gt;</code></li>
+                <li>Перевірте відповідь API Telegram, має повернути <code>"ok": true</code>.</li>
+              </ol>
+              <h6>Приклади команд для BotFather</h6>
+              <ul class="mb-0">
+                <li><code>/setdescription</code> – додайте опис для користувачів.</li>
+                <li><code>/setuserpic</code> – встановіть аватар.</li>
+                <li><code>/setcommands</code> – опишіть доступні команди меню.</li>
+              </ul>
+              <p class="mt-3 mb-0">Після запуску бота адміністратор може ввести свій Telegram username в CRM налаштуваннях, після старту бота ID прив&apos;яжеться автоматично.</p>
+            </div>
+          </div>
+        </div>
         <div class="form-section">
           <div class="mb-3">
             <label class="form-label">Bot Token <span class="required">*</span></label>
             <input type="text" id="botToken" class="form-control" placeholder="Вставте токен" required>
           </div>
           <button class="btn btn-primary" id="saveBotToken">Зберегти</button>
-          <div id="botSettingsMessage" class="alert alert-success mt-3" style="display:none;">Бота активовано успішно.</div>
+          <div id="botSettingsMessage" class="alert alert-success mt-3" style="display:none;"></div>
+          <div id="botSettingsError" class="alert alert-danger mt-3" style="display:none;"></div>
         </div>
       </div>
     </main>

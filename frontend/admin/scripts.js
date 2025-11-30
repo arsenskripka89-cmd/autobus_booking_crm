@@ -508,7 +508,6 @@ function initUsersPage() {
       document.getElementById('user-email').value = user.email || '';
       document.getElementById('user-phone').value = user.phone || '';
       document.getElementById('user-telegram-username').value = user.telegram_username || '';
-      document.getElementById('user-telegram-id').value = user.telegram_id || '';
       document.getElementById('user-role').value = user.role || 'user';
       document.getElementById('user-password').value = '';
     }

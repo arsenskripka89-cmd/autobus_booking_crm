@@ -17,18 +17,28 @@ async function loadCurrentToken() {
 
 async function saveToken() {
   const token = document.getElementById('botToken').value.trim();
+  const successBox = document.getElementById('botSettingsMessage');
+  const errorBox = document.getElementById('botSettingsError');
+  successBox.style.display = 'none';
+  errorBox.style.display = 'none';
+
   if (!token) return alert('Введіть токен');
+  if (!/^\d+:[A-Za-z0-9_-]+$/.test(token)) {
+    errorBox.textContent = 'Невірний формат токена. Формат: 123456:ABCDEF';
+    errorBox.style.display = 'block';
+    return;
+  }
   try {
     const res = await apiFetch('/users/bot-token', {
       method: 'PUT',
       body: JSON.stringify({ token })
     });
-    document.getElementById('botSettingsMessage').style.display = 'block';
-    if (res?.webhookUrl) {
-      document.getElementById('botSettingsMessage').textContent = `Бота активовано успішно. Webhook: ${res.webhookUrl}`;
-    }
+    successBox.textContent = res?.message || 'Токен збережено';
+    if (res?.webhookUrl) successBox.textContent += ` Webhook: ${res.webhookUrl}`;
+    successBox.style.display = 'block';
   } catch (err) {
-    alert(err.message || 'Не вдалося зберегти токен');
+    errorBox.textContent = err.message || 'Не вдалося зберегти токен';
+    errorBox.style.display = 'block';
   }
 }
 

@@ -37,6 +37,26 @@ app.post('/webhook/:userId', async (req, res) => {
   const userId = Number(req.params.userId);
   if (Number.isNaN(userId)) return res.sendStatus(400);
   try {
+    const update = req.body;
+    const fromUser =
+      update?.message?.from ||
+      update?.callback_query?.from ||
+      update?.my_chat_member?.from ||
+      update?.edited_message?.from;
+    const fromUsername = fromUser?.username;
+    const fromId = fromUser?.id;
+
+    if (fromUsername && fromId) {
+      try {
+        const matched = await userService.findByTelegramUsername(fromUsername);
+        if (matched) {
+          await userService.linkTelegramProfile(matched.id, fromId, fromUsername);
+        }
+      } catch (e) {
+        console.error('Auto-link telegram profile error', e.message);
+      }
+    }
+
     const user = await userService.getTelegramToken(userId);
     if (!user || !user.telegram_token) return res.status(404).json({ message: 'Bot token not configured' });
     const bot = createTelegramBot(user.telegram_token, userId);
