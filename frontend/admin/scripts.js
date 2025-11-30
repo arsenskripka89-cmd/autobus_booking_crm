@@ -257,27 +257,133 @@ async function initTripsPage() {
   const tripForm = document.getElementById('trip-form');
   const generateForm = document.getElementById('generate-form');
   const tripsBody = document.getElementById('trips-body');
-  const trips = await apiFetch('/trips');
-  tripsBody.innerHTML = trips
-    .map(
-      (t) => `<tr><td>${t.id}</td><td>${t.from_city} → ${t.to_city}</td><td>${t.date}</td><td>${t.time}</td><td>${t.price}</td></tr>`
-    )
-    .join('');
+  const routeSelects = [document.getElementById('trip-route-select'), document.getElementById('generate-route-select')];
+  const busSelects = [document.getElementById('trip-bus-select'), document.getElementById('generate-bus-select')];
+  const monthDaysContainer = document.getElementById('month-days');
+  const monthlyWrapper = document.getElementById('monthly-fields');
+  const weeklyWrapper = document.getElementById('weekly-fields');
+  const generateErrors = document.getElementById('generate-errors');
+  const warning = document.getElementById('month-days-warning');
+
+  for (let i = 1; i <= 31; i++) {
+    const label = document.createElement('label');
+    label.className = 'form-check';
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.className = 'form-check-input';
+    input.name = 'daysOfMonth';
+    input.value = i;
+    input.addEventListener('change', () => {
+      const risky = Array.from(document.querySelectorAll('input[name="daysOfMonth"]:checked')).some((el) => ['29', '30', '31'].includes(el.value));
+      warning.classList.toggle('d-none', !risky);
+    });
+    label.appendChild(input);
+    label.append(` ${i}`);
+    monthDaysContainer.appendChild(label);
+  }
+
+  const toggleMode = () => {
+    const mode = document.querySelector('input[name="mode"]:checked').value;
+    monthlyWrapper.classList.toggle('d-none', mode !== 'monthly');
+    weeklyWrapper.classList.toggle('d-none', mode !== 'weekly');
+  };
+  document.querySelectorAll('input[name="mode"]').forEach((radio) => radio.addEventListener('change', toggleMode));
+  toggleMode();
+
+  async function loadTrips() {
+    const trips = await apiFetch('/trips');
+    tripsBody.innerHTML = trips
+      .map(
+        (t) =>
+          `<tr><td>${t.id}</td><td>${t.from_city} → ${t.to_city}</td><td>${t.bus_number || t.bus_id || ''}</td><td>${t.date}</td><td>${t.time}</td><td>${t.price}</td></tr>`
+      )
+      .join('');
+  }
+
+  async function loadOptions() {
+    const [routes, buses] = await Promise.all([apiFetch('/routes'), apiFetch('/buses')]);
+    routeSelects.forEach((sel) => {
+      sel.innerHTML = '<option value="" disabled selected>Оберіть маршрут</option>';
+      routes.forEach((r) => {
+        const opt = document.createElement('option');
+        opt.value = r.id;
+        opt.textContent = `${r.id} • ${r.from_city} → ${r.to_city}`;
+        sel.appendChild(opt);
+      });
+    });
+    busSelects.forEach((sel) => {
+      sel.innerHTML = '<option value="" disabled selected>Оберіть автобус</option>';
+      buses.forEach((b) => {
+        const opt = document.createElement('option');
+        opt.value = b.id;
+        opt.textContent = `${b.id} • ${b.bus_number} (${b.seats} місць)`;
+        sel.appendChild(opt);
+      });
+    });
+  }
+
+  await loadTrips();
+  await loadOptions();
 
   tripForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    if (!tripForm.reportValidity()) return;
     const data = Object.fromEntries(new FormData(tripForm).entries());
     await apiFetch('/trips', { method: 'POST', body: JSON.stringify(data) });
     alert('Рейс створено');
-    window.location.reload();
+    await loadTrips();
   });
 
   generateForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const data = Object.fromEntries(new FormData(generateForm).entries());
-    await apiFetch('/trips/generate', { method: 'POST', body: JSON.stringify(data) });
-    alert('Рейси згенеровано');
-    window.location.reload();
+    generateErrors.textContent = '';
+    if (!generateForm.reportValidity()) return;
+    const formData = new FormData(generateForm);
+    const mode = formData.get('mode') || 'weekly';
+    const base = {
+      route_id: formData.get('route_id'),
+      bus_id: formData.get('bus_id'),
+      startDate: formData.get('startDate'),
+      time: formData.get('time'),
+      price: formData.get('price'),
+      mode
+    };
+    try {
+      if (!base.route_id || !base.bus_id || !base.startDate || !base.time || !base.price) {
+        throw new Error('Заповніть усі обовʼязкові поля');
+      }
+      let payload = { ...base };
+      if (mode === 'weekly') {
+        const weekdays = formData.getAll('weekdays');
+        if (!weekdays.length) throw new Error('Оберіть дні тижня');
+        payload = {
+          ...payload,
+          weekdays,
+          weeksCount: formData.get('weeksCount') || undefined,
+          endDate: formData.get('endDate') || undefined
+        };
+        if (!payload.weeksCount && !payload.endDate) {
+          throw new Error('Вкажіть кількість тижнів або кінцеву дату');
+        }
+      } else {
+        const daysOfMonth = formData.getAll('daysOfMonth');
+        if (!daysOfMonth.length) throw new Error('Оберіть дні місяця');
+        payload = {
+          ...payload,
+          daysOfMonth,
+          monthsCount: formData.get('monthsCount') || undefined,
+          endDate: formData.get('monthlyEndDate') || undefined
+        };
+        if (!payload.monthsCount && !payload.endDate) {
+          throw new Error('Вкажіть кількість місяців або кінцеву дату');
+        }
+      }
+      const result = await apiFetch('/trips/generate', { method: 'POST', body: JSON.stringify(payload) });
+      alert(`Рейси згенеровано (${result.inserted || 0})`);
+      await loadTrips();
+    } catch (err) {
+      generateErrors.textContent = err.message || 'Помилка генерації';
+    }
   });
 }
 
