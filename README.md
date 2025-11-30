@@ -7,8 +7,8 @@
 2. Запустіть сервер: `npm start` (PORT=3000 за замовчуванням)
 3. Адмінка: `http://localhost:3000/admin/login.html`
 4. Дефолтні акаунти для входу (email + пароль):
+   - arsenskripka89@gmail.com / Arsen2024!
    - admin@example.com / admin123
-   - test@example.com / test123
 
 ## Стек
 - Node.js, Express, sqlite3

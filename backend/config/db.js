@@ -112,27 +112,26 @@ db.serialize(() => {
     }
   });
 
-  // Seed default users if none exist
-  db.get('SELECT COUNT(*) as count FROM users', (err, row) => {
-    if (err) return console.error('DB seed error', err);
-    if (row.count === 0) {
-      const bcrypt = require('bcryptjs');
-      const adminHash = bcrypt.hashSync('admin123', 10);
-      const testHash = bcrypt.hashSync('test123', 10);
-      db.run('INSERT INTO users (name, email, password_hash, role) VALUES (?,?,?,?)', [
-        'Admin',
-        'admin@example.com',
-        adminHash,
-        'admin'
-      ]);
-      db.run('INSERT INTO users (name, email, password_hash, role) VALUES (?,?,?,?)', [
-        'Test User',
-        'test@example.com',
-        testHash,
-        'manager'
-      ]);
-      console.log('Seeded default users: admin@example.com/admin123 and test@example.com/test123');
-    }
+  // Seed required admin users if they are missing
+  const bcrypt = require('bcryptjs');
+  const seeds = [
+    { name: 'Owner Admin', email: 'arsenskripka89@gmail.com', password: 'Arsen2024!', role: 'admin' },
+    { name: 'Default Admin', email: 'admin@example.com', password: 'admin123', role: 'admin' }
+  ];
+
+  seeds.forEach((seed) => {
+    db.get('SELECT id FROM users WHERE email = ?', [seed.email], (findErr, existing) => {
+      if (findErr) return console.error('DB seed lookup error', findErr.message);
+      if (existing) return;
+      const password_hash = bcrypt.hashSync(seed.password, 10);
+      db.run(
+        'INSERT INTO users (name, email, password_hash, role) VALUES (?,?,?,?)',
+        [seed.name, seed.email, password_hash, seed.role],
+        (insertErr) => {
+          if (insertErr) console.error('Failed to seed user', seed.email, insertErr.message);
+        }
+      );
+    });
   });
 });
 
