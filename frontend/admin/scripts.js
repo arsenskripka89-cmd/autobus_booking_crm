@@ -14,6 +14,40 @@ function authHeaders() {
   return headers;
 }
 
+function setAdminEmail(email) {
+  if (email) sessionStorage.setItem('adminEmail', email);
+}
+
+async function resolveAdminEmail() {
+  const cached = sessionStorage.getItem('adminEmail');
+  if (cached) return cached;
+  try {
+    const me = await apiFetch('/users/me');
+    if (me?.email) {
+      setAdminEmail(me.email);
+      return me.email;
+    }
+  } catch (err) {
+    console.warn('Unable to resolve admin email', err.message);
+  }
+  return '';
+}
+
+async function renderUserBadge() {
+  const header = document.querySelector('.page-header');
+  if (!header) return;
+  const email = (await resolveAdminEmail()) || '...';
+  let badge = header.querySelector('.user-badge');
+  if (!badge) {
+    badge = document.createElement('div');
+    badge.className = 'user-badge';
+    badge.innerHTML = `<i class="bi bi-person-circle"></i><span class="user-email"></span>`;
+    header.appendChild(badge);
+  }
+  const label = badge.querySelector('.user-email');
+  if (label) label.textContent = email;
+}
+
 async function apiFetch(path, options = {}) {
   const res = await fetch(`${API_URL}${path.startsWith('/') ? path : `/${path}`}`, {
     ...options,
@@ -102,7 +136,7 @@ async function login(event) {
       body: JSON.stringify({ email, password })
     });
     setToken(data.token);
-    sessionStorage.setItem('adminEmail', email);
+    setAdminEmail(data.email || email);
     window.location.href = '/admin/dashboard.html';
   } catch (err) {
     alert(err.message || 'Невірні дані');
@@ -520,6 +554,7 @@ function attachPageHandlers() {
   }
   ensureAuth();
   buildSidebar(page);
+  renderUserBadge();
   switch (page) {
     case 'dashboard':
       loadDashboard();

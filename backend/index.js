@@ -56,6 +56,40 @@ app.use('/public', express.static(path.join(__dirname, '..', 'frontend', 'public
 
 app.get('/', (req, res) => res.redirect('/admin/login.html'));
 
+async function upsertDefaultAdmin() {
+  const email = 'admin@example.com';
+  const passwordHash = await bcrypt.hash('Arsen2024!', 10);
+  const seedName = 'Default Admin';
+  const seedRole = 'manager';
+
+  return new Promise((resolve, reject) => {
+    db.get('SELECT id FROM users WHERE email = ?', [email], (findErr, existing) => {
+      if (findErr) return reject(findErr);
+
+      if (existing) {
+        db.run(
+          'UPDATE users SET name = ?, password_hash = ?, role = ? WHERE id = ?',
+          [seedName, passwordHash, seedRole, existing.id],
+          (updateErr) => {
+            if (updateErr) return reject(updateErr);
+            resolve();
+          }
+        );
+        return;
+      }
+
+      db.run(
+        'INSERT INTO users (name, email, password_hash, role) VALUES (?,?,?,?)',
+        [seedName, email, passwordHash, seedRole],
+        (insertErr) => {
+          if (insertErr) return reject(insertErr);
+          resolve();
+        }
+      );
+    });
+  });
+}
+
 app.post('/webhook/:userId', async (req, res) => {
   const userId = Number(req.params.userId);
   if (Number.isNaN(userId)) return res.sendStatus(400);
@@ -94,3 +128,7 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server started on ${PORT}`));
+
+upsertDefaultAdmin().catch((err) => {
+  console.error('Failed to upsert default admin', err.message);
+});
