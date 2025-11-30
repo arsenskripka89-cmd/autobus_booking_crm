@@ -2,7 +2,15 @@ const tripService = require('../services/trip.service');
 const bookingService = require('../services/booking.service');
 
 async function list(req, res, next) {
-  try { res.json(await tripService.getAll(req.userId)); } catch (err) { next(err); }
+  try {
+    const trips = await tripService.getAll(req.userId);
+    if (req.user?.role === 'driver') {
+      console.log(`[driver] ${req.userId} переглядає рейси`);
+    }
+    res.json(trips);
+  } catch (err) {
+    next(err);
+  }
 }
 
 async function get(req, res, next) {
@@ -34,6 +42,7 @@ async function generate(req, res, next) {
 async function passengers(req, res, next) {
   try {
     const list = await bookingService.listByTrip(req.params.id, req.userId);
+    console.log(`[driver] Пасажири для рейсу ${req.params.id} запитані користувачем ${req.userId}`);
     res.json(list);
   } catch (err) {
     next(err);

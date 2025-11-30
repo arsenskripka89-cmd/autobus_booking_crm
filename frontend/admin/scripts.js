@@ -84,7 +84,8 @@ function buildSidebar(activePage) {
     { page: 'passengers', href: 'passengers.html', label: 'Пасажири', icon: 'bi-people-fill' },
     { page: 'broadcasts', href: 'broadcasts.html', label: 'Розсилки', icon: 'bi-megaphone' },
     { page: 'buses', href: 'buses.html', label: 'Автобуси', icon: 'bi-bus-front' },
-    { page: 'bot-settings', href: 'bot-settings.html', label: 'Налаштування бота', icon: 'bi-robot' }
+    { page: 'bot-settings', href: 'bot-settings.html', label: 'Налаштування бота', icon: 'bi-robot' },
+    { page: 'telegram-setup', href: 'telegram-setup.html', label: 'Telegram Bot Setup', icon: 'bi-book' }
   ];
 
   sidebar.innerHTML = `
@@ -444,11 +445,76 @@ function initBookingsPage() {
 
 function initUsersPage() {
   const tbody = document.getElementById('users-body');
-  apiFetch('/users').then((rows) => {
+  const form = document.getElementById('user-form');
+  const resetBtn = document.getElementById('reset-user-form');
+
+  async function loadUsers() {
+    const rows = await apiFetch('/users');
     tbody.innerHTML = rows
-      .map((u) => `<tr><td>${u.id}</td><td>${u.name || ''}</td><td>${u.email || ''}</td><td>${u.role}</td></tr>`)
+      .map(
+        (u) => `
+        <tr>
+          <td>${u.id}</td>
+          <td>${u.name || ''}</td>
+          <td>${u.email || ''}</td>
+          <td>${u.phone || ''}</td>
+          <td>${u.telegram_username ? '@' + u.telegram_username : ''}${u.telegram_id ? `<div class="text-muted small">${u.telegram_id}</div>` : ''}</td>
+          <td>${u.role}</td>
+          <td class="text-center">
+            <button class="btn btn-sm btn-outline-primary" data-action="edit" data-id="${u.id}">✏</button>
+            <button class="btn btn-sm btn-outline-danger" data-action="delete" data-id="${u.id}">🗑</button>
+          </td>
+        </tr>`
+      )
       .join('');
+  }
+
+  function resetForm() {
+    form.reset();
+    document.getElementById('user-id').value = '';
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = Object.fromEntries(new FormData(form).entries());
+    const payload = { ...formData };
+    if (!payload.role) payload.role = 'user';
+    if (!payload.email) delete payload.email;
+    if (!payload.password) delete payload.password;
+    const id = payload.id;
+    delete payload.id;
+    const method = id ? 'PUT' : 'POST';
+    const url = id ? `/users/${id}` : '/users';
+    await apiFetch(url, { method, body: JSON.stringify(payload) });
+    resetForm();
+    await loadUsers();
   });
+
+  resetBtn?.addEventListener('click', resetForm);
+
+  tbody.addEventListener('click', async (e) => {
+    const action = e.target.dataset.action;
+    const id = e.target.dataset.id;
+    if (!action || !id) return;
+    if (action === 'delete') {
+      if (!confirm('Видалити користувача?')) return;
+      await apiFetch(`/users/${id}`, { method: 'DELETE' });
+      await loadUsers();
+    }
+    if (action === 'edit') {
+      const user = await apiFetch(`/users/${id}`);
+      document.getElementById('user-id').value = user.id;
+      document.getElementById('user-name').value = user.name || '';
+      document.getElementById('user-email').value = user.email || '';
+      document.getElementById('user-phone').value = user.phone || '';
+      document.getElementById('user-telegram-username').value = user.telegram_username || '';
+      document.getElementById('user-telegram-id').value = user.telegram_id || '';
+      document.getElementById('user-role').value = user.role || 'user';
+      document.getElementById('user-password').value = '';
+    }
+  });
+
+  loadUsers();
 }
 
 function initBroadcastsPage() {
@@ -579,6 +645,9 @@ function attachPageHandlers() {
       break;
     case 'buses':
       initBusesPage();
+      break;
+    case 'telegram-setup':
+      // static instructions page
       break;
     default:
       break;
