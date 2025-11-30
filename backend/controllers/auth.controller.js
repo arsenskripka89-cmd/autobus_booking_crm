@@ -20,4 +20,13 @@ async function login(req, res, next) {
   }
 }
 
-module.exports = { register, login };
+async function telegramAuth(req, res, next) {
+  try {
+    const result = await authService.telegramAuth(req.body || {});
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { register, login, telegramAuth };

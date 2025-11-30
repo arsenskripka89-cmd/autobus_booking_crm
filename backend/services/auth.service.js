@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../config/db');
+const userService = require('./user.service');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secretkey';
 
@@ -43,4 +44,38 @@ function login(email, password) {
   });
 }
 
-module.exports = { register, login, JWT_SECRET };
+async function telegramAuth(payload) {
+  const telegramId = payload.telegram_id?.toString();
+  const telegramUsername = payload.telegram_username?.replace(/^@/, '') || null;
+  const displayName = payload.first_name || telegramUsername || 'Telegram user';
+  if (!telegramId) throw new Error('telegram_id is required');
+
+  let user = await userService.findByTelegramId(telegramId);
+  if (user) {
+    if (!user.telegram_username && telegramUsername) {
+      await userService.linkTelegramProfile(user.id, telegramId, telegramUsername);
+    }
+    console.log(`[telegram] Existing user ${user.id} (${user.role}) started bot`);
+    return { role: user.role || 'user', userId: user.id, name: user.name };
+  }
+
+  if (telegramUsername) {
+    const matchedByUsername = await userService.findByTelegramUsername(telegramUsername);
+    if (matchedByUsername) {
+      await userService.linkTelegramProfile(matchedByUsername.id, telegramId, telegramUsername);
+      console.log(`[telegram] Linked @${telegramUsername} to user ${matchedByUsername.id} with role ${matchedByUsername.role}`);
+      return { role: matchedByUsername.role || 'user', userId: matchedByUsername.id, name: matchedByUsername.name };
+    }
+  }
+
+  const created = await userService.create({
+    name: displayName,
+    telegram_id: telegramId,
+    telegram_username: telegramUsername,
+    role: 'user'
+  });
+  console.log(`[telegram] New user registered from bot ${created.id}`);
+  return { role: created.role || 'user', userId: created.id, name: displayName };
+}
+
+module.exports = { register, login, telegramAuth, JWT_SECRET };

@@ -13,6 +13,9 @@ async function list(req, res, next) {
 async function create(req, res, next) {
   try {
     const user = await userService.create(req.body);
+    if (user.role === 'driver') {
+      console.log(`[driver] Додано нового водія id=${user.id} ${user.name || ''}`);
+    }
     res.status(201).json(user);
   } catch (err) {
     next(err);
@@ -22,6 +25,9 @@ async function create(req, res, next) {
 async function update(req, res, next) {
   try {
     const result = await userService.update(req.params.id, req.body);
+    if (req.body.role === 'driver') {
+      console.log(`[driver] Оновлено користувача ${req.params.id} як водія`);
+    }
     res.json(result);
   } catch (err) {
     next(err);
@@ -63,6 +69,7 @@ async function updateTelegramToken(req, res, next) {
     const serverUrl = (process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
     const webhookUrl = `${serverUrl}/webhook/${req.userId}`;
     await axios.get(`https://api.telegram.org/bot${token}/setWebhook`, { params: { url: webhookUrl } });
+    console.log(`[admin] Telegram бот прив'язаний адміністратором user=${req.userId}`);
     res.json({ success: true, webhookUrl, message: 'Бота активовано успішно' });
   } catch (err) {
     next(err);

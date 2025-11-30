@@ -14,11 +14,64 @@
     <main class="content-area">
       <div class="container-fluid">
         <div class="page-header"><h3 class="mb-0">Користувачі</h3></div>
-        <div class="table-responsive">
-          <table class="table table-bordered">
-            <thead class="table-light"><tr><th>ID</th><th>Ім'я</th><th>Email</th><th>Роль</th></tr></thead>
-            <tbody id="users-body"></tbody>
-          </table>
+        <div class="row g-4">
+          <div class="col-lg-5">
+            <div class="form-section">
+              <h5 class="mb-3">Додати / оновити користувача</h5>
+              <form id="user-form" class="row g-3">
+                <input type="hidden" name="id" id="user-id">
+                <div class="col-12">
+                  <label class="form-label">Ім'я</label>
+                  <input name="name" id="user-name" class="form-control" placeholder="Ім'я користувача">
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Email</label>
+                  <input name="email" id="user-email" type="email" class="form-control" placeholder="name@example.com">
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Пароль</label>
+                  <input name="password" id="user-password" type="password" class="form-control" placeholder="Залиште порожнім щоб не змінювати">
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Роль</label>
+                  <select name="role" id="user-role" class="form-select">
+                    <option value="user">Клієнт</option>
+                    <option value="driver">Водій</option>
+                    <option value="manager">Менеджер</option>
+                    <option value="admin">Адмін</option>
+                  </select>
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Telegram username</label>
+                  <input name="telegram_username" id="user-telegram-username" class="form-control" placeholder="username">
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Telegram ID</label>
+                  <input name="telegram_id" id="user-telegram-id" class="form-control" placeholder="123456789">
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Телефон</label>
+                  <input name="phone" id="user-phone" class="form-control" placeholder="+380...">
+                </div>
+                <div class="col-12 d-flex gap-2">
+                  <button class="btn btn-primary" type="submit">Зберегти</button>
+                  <button class="btn btn-outline-secondary" type="button" id="reset-user-form">Очистити</button>
+                </div>
+              </form>
+            </div>
+          </div>
+          <div class="col-lg-7">
+            <div class="table-responsive">
+              <table class="table table-bordered align-middle">
+                <thead class="table-light">
+                  <tr>
+                    <th>ID</th><th>Ім'я</th><th>Email</th><th>Телефон</th><th>Telegram</th><th>Роль</th><th style="width:120px;" class="text-center">Дії</th>
+                  </tr>
+                </thead>
+                <tbody id="users-body"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </main>

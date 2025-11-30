@@ -8,9 +8,12 @@ db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT,
-    email TEXT UNIQUE NOT NULL,
-    password_hash TEXT NOT NULL,
-    role TEXT NOT NULL DEFAULT 'manager',
+    email TEXT UNIQUE,
+    password_hash TEXT,
+    role TEXT NOT NULL DEFAULT 'user',
+    telegram_id TEXT,
+    telegram_username TEXT,
+    phone TEXT,
     telegram_token TEXT DEFAULT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );`);
@@ -78,7 +81,28 @@ db.serialize(() => {
       console.error('Failed to add telegram_token column', err.message);
     }
   });
+  db.run('ALTER TABLE users ADD COLUMN telegram_id TEXT', (err) => {
+    if (err && !String(err.message).includes('duplicate column')) {
+      console.error('Failed to add telegram_id column', err.message);
+    }
+  });
+  db.run('ALTER TABLE users ADD COLUMN telegram_username TEXT', (err) => {
+    if (err && !String(err.message).includes('duplicate column')) {
+      console.error('Failed to add telegram_username column', err.message);
+    }
+  });
+  db.run('ALTER TABLE users ADD COLUMN phone TEXT', (err) => {
+    if (err && !String(err.message).includes('duplicate column')) {
+      console.error('Failed to add phone column', err.message);
+    }
+  });
+  db.run('ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT "user"', (err) => {
+    if (err && !String(err.message).includes('duplicate column')) {
+      console.error('Failed to backfill role column', err.message);
+    }
+  });
   db.run('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_users_telegram ON users(telegram_id, telegram_username)');
 
   db.run('ALTER TABLE routes ADD COLUMN parent_route_id INTEGER', (err) => {
     if (err && !String(err.message).includes('duplicate column')) {
@@ -112,29 +136,19 @@ db.serialize(() => {
     }
   });
 
-  // Seed required admin users if they are missing
+  // Seed required admin users if database is empty
   const bcrypt = require('bcryptjs');
   const seeds = [
     { name: 'Owner Admin', email: 'arsenskripka89@gmail.com', password: 'Arsen2024!', role: 'admin' },
     { name: 'Default Admin', email: 'admin@example.com', password: 'Arsen2024!', role: 'manager' }
   ];
 
-  seeds.forEach((seed) => {
-    db.get('SELECT id FROM users WHERE email = ?', [seed.email], (findErr, existing) => {
-      if (findErr) return console.error('DB seed lookup error', findErr.message);
+  db.get('SELECT COUNT(*) as total FROM users', (countErr, row) => {
+    if (countErr) return console.error('Failed to count users', countErr.message);
+    if ((row?.total || 0) > 0) return; // only seed when empty
+
+    seeds.forEach((seed) => {
       const password_hash = bcrypt.hashSync(seed.password, 10);
-
-      if (existing) {
-        db.run(
-          'UPDATE users SET name = ?, password_hash = ?, role = ? WHERE id = ?',
-          [seed.name, password_hash, seed.role, existing.id],
-          (updateErr) => {
-            if (updateErr) console.error('Failed to update seed user', seed.email, updateErr.message);
-          }
-        );
-        return;
-      }
-
       db.run(
         'INSERT INTO users (name, email, password_hash, role) VALUES (?,?,?,?)',
         [seed.name, seed.email, password_hash, seed.role],
