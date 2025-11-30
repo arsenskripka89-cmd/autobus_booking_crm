@@ -35,8 +35,10 @@ function login(email, password) {
       if (!user) return reject(new Error('Невірний email або пароль'));
       const valid = bcrypt.compareSync(password, user.password_hash);
       if (!valid) return reject(new Error('Невірний email або пароль'));
-      const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
-      resolve({ token, email: user.email });
+      const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, {
+        expiresIn: '7d'
+      });
+      resolve({ token, email: user.email, role: user.role });
     });
   });
 }
