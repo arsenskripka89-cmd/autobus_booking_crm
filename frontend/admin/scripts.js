@@ -94,11 +94,15 @@ async function login(event) {
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value.trim();
   try {
+    if (!email) throw new Error('Вкажіть email');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('Некоректний email');
+    if (!password) throw new Error('Вкажіть пароль');
     const data = await apiFetch('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password })
     });
     setToken(data.token);
+    sessionStorage.setItem('adminEmail', email);
     window.location.href = '/admin/dashboard.html';
   } catch (err) {
     alert(err.message || 'Невірні дані');
@@ -408,7 +412,7 @@ function initUsersPage() {
   const tbody = document.getElementById('users-body');
   apiFetch('/users').then((rows) => {
     tbody.innerHTML = rows
-      .map((u) => `<tr><td>${u.id}</td><td>${u.name || ''}</td><td>${u.phone || ''}</td><td>${u.role}</td></tr>`)
+      .map((u) => `<tr><td>${u.id}</td><td>${u.name || ''}</td><td>${u.email || ''}</td><td>${u.role}</td></tr>`)
       .join('');
   });
 }

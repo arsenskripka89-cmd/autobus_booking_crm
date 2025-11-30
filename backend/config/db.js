@@ -8,7 +8,6 @@ db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT,
-    phone TEXT UNIQUE,
     email TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
     role TEXT NOT NULL DEFAULT 'manager',
@@ -79,6 +78,7 @@ db.serialize(() => {
       console.error('Failed to add telegram_token column', err.message);
     }
   });
+  db.run('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email)');
 
   db.run('ALTER TABLE routes ADD COLUMN parent_route_id INTEGER', (err) => {
     if (err && !String(err.message).includes('duplicate column')) {
@@ -112,20 +112,26 @@ db.serialize(() => {
     }
   });
 
-  // Seed admin user if none exists
+  // Seed default users if none exist
   db.get('SELECT COUNT(*) as count FROM users', (err, row) => {
     if (err) return console.error('DB seed error', err);
     if (row.count === 0) {
       const bcrypt = require('bcryptjs');
-      const password_hash = bcrypt.hashSync('admin123', 10);
-      db.run('INSERT INTO users (name, phone, email, password_hash, role) VALUES (?,?,?,?,?)', [
+      const adminHash = bcrypt.hashSync('admin123', 10);
+      const testHash = bcrypt.hashSync('test123', 10);
+      db.run('INSERT INTO users (name, email, password_hash, role) VALUES (?,?,?,?)', [
         'Admin',
-        '+10000000000',
         'admin@example.com',
-        password_hash,
+        adminHash,
         'admin'
       ]);
-      console.log('Seeded default admin user +10000000000 / admin123');
+      db.run('INSERT INTO users (name, email, password_hash, role) VALUES (?,?,?,?)', [
+        'Test User',
+        'test@example.com',
+        testHash,
+        'manager'
+      ]);
+      console.log('Seeded default users: admin@example.com/admin123 and test@example.com/test123');
     }
   });
 });
