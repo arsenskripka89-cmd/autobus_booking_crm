@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="bg-white shadow rounded-lg p-6 space-y-4">
+    <h2 class="text-xl font-semibold">Налаштування OpenAI</h2>
+    {% if saved %}
+      <div class="p-3 rounded bg-green-50 text-green-700 border border-green-200">API ключ збережено.</div>
+    {% endif %}
+    <form action="/settings" method="post" class="space-y-3">
+      <label class="block text-sm font-medium text-slate-700">API ключ</label>
+      <input type="text" name="api_key" value="{{ api_key }}" class="w-full border border-slate-200 rounded px-3 py-2" placeholder="Введіть OpenAI API ключ" />
+      <button type="submit" class="px-4 py-2 bg-slate-900 text-white rounded">Зберегти API ключ</button>
+    </form>
+  </div>
+{% endblock %}

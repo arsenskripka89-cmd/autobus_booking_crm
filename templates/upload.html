@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="bg-white shadow rounded-lg p-6 space-y-4">
+    <h2 class="text-xl font-semibold">Завантажити XLSX</h2>
+    {% if request.query_params.get('success') %}
+      <div class="p-3 rounded bg-green-50 text-green-700 border border-green-200">Файл успішно збережено.</div>
+    {% endif %}
+    <form action="/upload" method="post" enctype="multipart/form-data" class="space-y-3">
+      <input type="file" name="file" accept=".xlsx" class="block w-full border border-slate-200 rounded px-3 py-2" required>
+      <button type="submit" class="px-4 py-2 bg-slate-900 text-white rounded">Завантажити</button>
+    </form>
+  </div>
+{% endblock %}

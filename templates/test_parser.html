@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="space-y-6">
+    <div class="bg-white shadow rounded-lg p-6 space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-semibold">Тест парсера</h2>
+        <button id="run-match" class="px-4 py-2 bg-slate-900 text-white rounded">Запустити AI matching</button>
+      </div>
+      <p class="text-slate-600">Поточний конкурент: <span class="font-semibold">{{ root_url }}</span></p>
+      <div id="match-message" class="text-sm text-red-600"></div>
+    </div>
+
+    <div class="bg-white shadow rounded-lg p-6">
+      <h3 class="text-lg font-semibold mb-4">Результати співставлення</h3>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-left text-sm" id="match-table">
+          <thead class="border-b">
+            <tr class="text-slate-600">
+              <th class="px-3 py-2">Наш товар</th>
+              <th class="px-3 py-2">Код</th>
+              <th class="px-3 py-2">Знайдений лінк</th>
+              <th class="px-3 py-2">Впевненість</th>
+              <th class="px-3 py-2">Редагувати</th>
+              <th class="px-3 py-2">Зберегти</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for match in matches %}
+            <tr class="border-b">
+              <td class="px-3 py-2">{{ match.product }}</td>
+              <td class="px-3 py-2">{{ match.code }}</td>
+              <td class="px-3 py-2">
+                <input type="text" value="{{ match.link }}" class="w-full border border-slate-200 rounded px-2 py-1" data-field="link" disabled />
+              </td>
+              <td class="px-3 py-2">
+                <input type="number" step="0.01" min="0" max="1" value="{{ match.confidence }}" class="w-24 border border-slate-200 rounded px-2 py-1" data-field="confidence" />
+              </td>
+              <td class="px-3 py-2">
+                <button class="px-3 py-1 bg-amber-100 text-amber-800 rounded edit-row">Редагувати</button>
+              </td>
+              <td class="px-3 py-2">
+                <button class="px-3 py-1 bg-slate-900 text-white rounded save-row">Зберегти</button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const runBtn = document.getElementById('run-match');
+    const messageBox = document.getElementById('match-message');
+    const table = document.getElementById('match-table');
+
+    function collectRowData(row) {
+      return {
+        product: row.children[0].innerText.trim(),
+        code: row.children[1].innerText.trim(),
+        link: row.querySelector('input[data-field="link"]').value.trim(),
+        confidence: parseFloat(row.querySelector('input[data-field="confidence"]').value) || 0,
+      };
+    }
+
+    function setInputsDisabled(row, disabled) {
+      row.querySelectorAll('input').forEach(input => input.disabled = disabled);
+    }
+
+    function attachRowHandlers(row) {
+      const editBtn = row.querySelector('.edit-row');
+      const saveBtn = row.querySelector('.save-row');
+
+      editBtn.addEventListener('click', () => {
+        setInputsDisabled(row, false);
+        row.querySelector('input[data-field="link"]').focus();
+      });
+
+      saveBtn.addEventListener('click', async () => {
+        const data = collectRowData(row);
+        await saveMatches([data]);
+        setInputsDisabled(row, true);
+      });
+    }
+
+    async function saveMatches(matches) {
+      const response = await fetch('/save-match', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(matches),
+      });
+      if (!response.ok) {
+        messageBox.textContent = 'Не вдалося зберегти зміни.';
+        return;
+      }
+      messageBox.textContent = 'Дані успішно збережено.';
+      messageBox.classList.remove('text-red-600');
+      messageBox.classList.add('text-green-700');
+    }
+
+    async function runMatching() {
+      messageBox.textContent = '';
+      const response = await fetch('/match', { method: 'POST' });
+      const payload = await response.json();
+      if (!response.ok || payload.error) {
+        messageBox.textContent = payload.error || 'Помилка запуску matching.';
+        messageBox.classList.remove('text-green-700');
+        messageBox.classList.add('text-red-600');
+        return;
+      }
+      renderMatches(payload.matches || []);
+      messageBox.textContent = 'Matching виконано та збережено.';
+      messageBox.classList.remove('text-red-600');
+      messageBox.classList.add('text-green-700');
+    }
+
+    function renderMatches(matches) {
+      const tbody = table.querySelector('tbody');
+      tbody.innerHTML = '';
+      matches.forEach(match => {
+        const row = document.createElement('tr');
+        row.className = 'border-b';
+        row.innerHTML = `
+          <td class="px-3 py-2">${match.product}</td>
+          <td class="px-3 py-2">${match.code}</td>
+          <td class="px-3 py-2">
+            <input type="text" value="${match.link || ''}" class="w-full border border-slate-200 rounded px-2 py-1" data-field="link" disabled />
+          </td>
+          <td class="px-3 py-2">
+            <input type="number" step="0.01" min="0" max="1" value="${match.confidence ?? ''}" class="w-24 border border-slate-200 rounded px-2 py-1" data-field="confidence" />
+          </td>
+          <td class="px-3 py-2"><button class="px-3 py-1 bg-amber-100 text-amber-800 rounded edit-row">Редагувати</button></td>
+          <td class="px-3 py-2"><button class="px-3 py-1 bg-slate-900 text-white rounded save-row">Зберегти</button></td>
+        `;
+        tbody.appendChild(row);
+        attachRowHandlers(row);
+      });
+    }
+
+    document.querySelectorAll('#match-table tbody tr').forEach(row => attachRowHandlers(row));
+    runBtn.addEventListener('click', runMatching);
+  </script>
+{% endblock %}
