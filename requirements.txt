@@ -1,0 +1,16 @@
+fastapi
+uvicorn[standard]
+jinja2
+python-multipart
+aiofiles
+
+httpx
+selectolax
+beautifulsoup4
+
+pandas
+openpyxl
+
+openai
+
+pydantic

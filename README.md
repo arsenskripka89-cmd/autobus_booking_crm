@@ -10,6 +10,12 @@
    - arsenskripka89@gmail.com / Arsen2024!
    - admin@example.com / admin123
 
+### FastAPI інструменти зіставлення
+1. Створіть віртуальне оточення Python (опційно): `python3 -m venv .venv && source .venv/bin/activate`
+2. Встановіть залежності FastAPI: `pip install -r requirements.txt`
+3. Запустіть сервер: `uvicorn main:app --reload` (PORT=8000 за замовчуванням)
+4. Веб-інтерфейс доступний на `http://localhost:8000`
+
 ## Стек
 - Node.js, Express, sqlite3
 - Telegraf (Telegram)
