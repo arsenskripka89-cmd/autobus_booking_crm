@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="space-y-6">
+    <div class="bg-white shadow rounded-lg p-6">
+      <h2 class="text-xl font-semibold">Результати парсингу конкурента</h2>
+    </div>
+
+    <div class="bg-white shadow rounded-lg p-6 space-y-4">
+      {% for group in groups %}
+      <div class="border-b pb-4 last:border-b-0 last:pb-0">
+        <h3 class="text-lg font-semibold mb-2">{{ group["name"] }}</h3>
+        <ul class="list-disc pl-5 space-y-1">
+          {% for cat in group["items"] %}
+          <li class="text-slate-700">{{ cat }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}
