@@ -1,0 +1,6 @@
+fastapi
+uvicorn[standard]
+pandas
+openpyxl
+Jinja2
+pydantic
